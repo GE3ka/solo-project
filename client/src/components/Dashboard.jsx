@@ -4,15 +4,19 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from './userContext';
 
 const Dashboard = () => {
+    // State variables
     const [jobs, setJobs] = useState([]);
     const [myJobs, setMyJobs] = useState([]);
     const [title, setTitle] = useState("");
     const [location, setLocation] = useState("");
 
+    // Parameters and navigate function from react-router-dom
     const { id } = useParams();
     const navigate = useNavigate();
+    // User context
     const { user, setUser } = useUser();
 
+    // Function to add a job to my jobs list
     const addJobToMyJobs = (jobObject) => {
         const jobExists = myJobs.some((job) => job._id === jobObject._id);
         if (!jobExists) {
@@ -21,10 +25,10 @@ const Dashboard = () => {
             localStorage.setItem('myJobs', JSON.stringify(updatedMyJobs));
         } else {
             console.log('Job already exists in my Jobs list');
-            
         }
     };
 
+    // Effect to set user from localStorage
     useEffect(() => {
         const userData = JSON.parse(localStorage.getItem('user'));
         if (userData) {
@@ -32,11 +36,13 @@ const Dashboard = () => {
         }
     }, [setUser]);
 
+    // Effect to set myJobs from localStorage
     useEffect(() => {
         const storedMyJobs = JSON.parse(localStorage.getItem('myJobs')) || [];
         setMyJobs(storedMyJobs);
     }, []);
 
+    // Effect to fetch all jobs
     useEffect(() => {
         axios.get("http://localhost:5000/api/jobs/view/")
             .then(res => {               
@@ -45,6 +51,7 @@ const Dashboard = () => {
             .catch(err => console.log(err));            
     }, []);
 
+    // Effect to fetch specific job and add it to my jobs list
     useEffect(() => {
         axios.get("http://localhost:5000/api/jobs/view/" + id)
             .then(res => {
@@ -59,6 +66,7 @@ const Dashboard = () => {
             .catch(err => console.log(err));
     }, [id, title, location, addJobToMyJobs]);
 
+    // Function to delete a job
     const deleteMe = (idToDelete) => {
         axios.delete("http://localhost:5000/api/jobs/" + idToDelete)
             .then(res => {
@@ -70,6 +78,7 @@ const Dashboard = () => {
             .catch(err => console.log(err));
     };
 
+    // Function to handle logout
     const handleLogout = () => {
         axios.post('http://localhost:5000/api/logout')
             .then(response => {
@@ -86,19 +95,23 @@ const Dashboard = () => {
       
     return (
         <div>
+            {/* Navbar */}
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container-fluid">
                     <span className="navbar-brand">Dashboard</span>
                     <div className="navbar-collapse justify-content-between">
                         <ul className="navbar-nav">
+                            {/* Welcome message */}
                             <li className="nav-item">
-                                <span className="nav-link">Welcome  {user ? (user.firstName) : ''}</span>
+                                <span className="nav-link">Welcome {user ? (user.firstName) : ''}</span>
                             </li>
+                            {/* Logout button */}
                             <li className="nav-item">
                                 <button className="nav-link"  onClick={handleLogout}>Logout</button>
                             </li>
                         </ul>
                         <ul className="navbar-nav">
+                            {/* Add a Job link */}
                             <li className="nav-item">
                                 <a className="nav-link" href="/dashboard/addJob">Add a Job</a>
                             </li>
@@ -107,8 +120,10 @@ const Dashboard = () => {
                 </div>
             </nav>
 
+            {/* Main content */}
             <div className="container mt-5">
                 <div className="row">
+                    {/* All Jobs section */}
                     <div className="col-md-6">
                         <h2 style={{ textAlign: 'center', color: '#ffe4c4' , fontSize: '2rem', marginTop: '20px' }}>All Jobs available</h2>
                         <table className="table table-striped">
@@ -125,12 +140,13 @@ const Dashboard = () => {
                                         <td>{jobObject.title}</td>
                                         <td>{jobObject.location}</td>
                                         <td>
-                                            <button className="btn  btn-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/view/" + jobObject._id)}>View</button>
-                                            <button className="btn btn-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => addJobToMyJobs(jobObject)}>Add</button>
+                                            {/* View, Add, Edit, and Cancel buttons */}
+                                            <button className="btn btn-outline-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/view/" + jobObject._id)}>View</button>
+                                            <button className="btn btn-outline-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => addJobToMyJobs(jobObject)}>Add</button>
                                             {user && user._id === jobObject.userId && (
                                                 <>
-                                                    <button className="btn btn-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/edit/" + jobObject._id)}>Edit</button>
-                                                    <button className="btn  btn-danger" style={{ width: '90px', margin: '3px' }} onClick={() => deleteMe(jobObject._id)}>Cancel</button>
+                                                    <button className="btn btn-outline-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/edit/" + jobObject._id)}>Edit</button>
+                                                    <button className="btn btn-outline-danger" style={{ width: '90px', margin: '3px' }} onClick={() => deleteMe(jobObject._id)}>Cancel</button>
                                                 </>
                                             )}
                                         </td>
@@ -139,6 +155,7 @@ const Dashboard = () => {
                             </tbody>
                         </table>
                     </div>
+                    {/* My Jobs section */}
                     {myJobs.length > 0 && (
                         <div className="col-md-6">
                             <h2  style={{ textAlign: 'center', color: '#ffe4c4' , fontSize: '2rem', marginTop: '20px' }}>My Jobs</h2>
@@ -154,10 +171,11 @@ const Dashboard = () => {
                                         <tr key={myJobObject._id}>
                                             <td>{myJobObject.title}</td>
                                             <td>
+                                                {/* View and Done buttons */}
                                                 {myJobObject._id && (
-                                                    <button className="btn  btn-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/view/" + myJobObject._id)}>View</button>
+                                                    <button className="btn btn-outline-secondary" style={{ width: '90px', margin: '3px' }} onClick={() => navigate("/dashboard/jobs/view/" + myJobObject._id)}>View</button>
                                                 )}
-                                                <button className="btn   btn-danger" style={{ width: '90px', margin: '3px' }} onClick={() => deleteMe(myJobObject._id)}>Done</button>
+                                                <button className="btn btn-outline-danger" style={{ width: '90px', margin: '3px' }} onClick={() => deleteMe(myJobObject._id)}>Done</button>
                                             </td>
                                         </tr>
                                     ))}
