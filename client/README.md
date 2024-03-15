@@ -36,10 +36,15 @@ Make sure you have the following software installed:
 Once the server is running, you can use the following endpoints to interact with the job management system:
 
 GET /api/jobs: Get all jobs
+
 GET /api/jobs/:id: Get a single job by ID
+
 POST /api/jobs/addJob: Add a new job
+
 PATCH /api/jobs/edit/:id: Edit an existing job
+
 DELETE /api/jobs/:id: Delete a job
+
 Make sure to replace :id with the ID of the job you want to interact with.
 
 Contributors
